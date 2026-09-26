@@ -1,0 +1,139 @@
+version: "3.9"
+
+services:
+  # ---------- Infrastructure ----------
+  postgres:
+    image: postgres:16
+    container_name: hms-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./infra/postgres/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: hms-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: hms-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  # ---------- Gateway ----------
+  api-gateway:
+    build: ./api-gateway
+    container_name: hms-api-gateway
+    ports:
+      - "8888:8888"
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8080
+      PATIENT_SERVICE_URL: http://patient-service:8081
+      DOCTOR_SERVICE_URL: http://doctor-service:8082
+      DEPARTMENT_SERVICE_URL: http://department-service:8083
+      APPOINTMENT_SERVICE_URL: http://appointment-service:8084
+    depends_on:
+      - auth-service
+      - patient-service
+      - doctor-service
+      - department-service
+      - appointment-service
+
+  # ---------- Core services (Phase 1) ----------
+  auth-service:
+    build: ./auth-service
+    container_name: hms-auth-service
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/auth_service
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: ${JWT_SECRET:-ZGV2LW9ubHktc2VjcmV0LWtleS1kby1ub3QtdXNlLWluLXByb2R1Y3Rpb24tMTIzNDU2Nzg=}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  patient-service:
+    build: ./patient-service
+    container_name: hms-patient-service
+    ports:
+      - "8081:8081"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/patient_service
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  doctor-service:
+    build: ./doctor-service
+    container_name: hms-doctor-service
+    ports:
+      - "8082:8082"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/doctor_service
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  department-service:
+    build: ./department-service
+    container_name: hms-department-service
+    ports:
+      - "8083:8083"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/department_service
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  appointment-service:
+    build: ./appointment-service
+    container_name: hms-appointment-service
+    ports:
+      - "8084:8084"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/appointment_service
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  # ---------- Phase 2 services (scaffolded, not yet build-verified) ----------
+  # prescription-service, admission-service, bed-service, medicine-service,
+  # billing-service, payment-service, lab-service, insurance-service,
+  # notification-service, audit-service: add the same block pattern once
+  # each service's implementation is filled in.
+
+volumes:
+  pgdata:

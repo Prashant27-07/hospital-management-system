@@ -1,0 +1,84 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8080}
+          predicates:
+            - Path=/api/auth/**
+
+        - id: patient-service
+          uri: ${PATIENT_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/patients/**
+
+        - id: doctor-service
+          uri: ${DOCTOR_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/doctors/**
+
+        - id: department-service
+          uri: ${DEPARTMENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/departments/**
+
+        - id: appointment-service
+          uri: ${APPOINTMENT_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/appointments/**
+
+        - id: prescription-service
+          uri: ${PRESCRIPTION_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/prescriptions/**
+
+        - id: admission-service
+          uri: ${ADMISSION_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/admissions/**
+
+        - id: bed-service
+          uri: ${BED_SERVICE_URL:http://localhost:8087}
+          predicates:
+            - Path=/api/beds/**
+
+        - id: medicine-service
+          uri: ${MEDICINE_SERVICE_URL:http://localhost:8088}
+          predicates:
+            - Path=/api/medicines/**
+
+        - id: billing-service
+          uri: ${BILLING_SERVICE_URL:http://localhost:8089}
+          predicates:
+            - Path=/api/billing/**
+
+        - id: payment-service
+          uri: ${PAYMENT_SERVICE_URL:http://localhost:8090}
+          predicates:
+            - Path=/api/payments/**
+
+        - id: lab-service
+          uri: ${LAB_SERVICE_URL:http://localhost:8091}
+          predicates:
+            - Path=/api/labs/**
+
+        - id: insurance-service
+          uri: ${INSURANCE_SERVICE_URL:http://localhost:8092}
+          predicates:
+            - Path=/api/insurance/**
+
+        - id: notification-service
+          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8093}
+          predicates:
+            - Path=/api/notifications/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
