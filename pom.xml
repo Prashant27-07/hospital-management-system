@@ -19,6 +19,7 @@
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <jjwt.version>0.12.6</jjwt.version>
         <springdoc.version>2.6.0</springdoc.version>
+        <lombok.version>1.18.34</lombok.version>
     </properties>
 
     <modules>
@@ -59,7 +60,7 @@
         </dependencies>
     </dependencyManagement>
 
-          <build>
+    <build>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -70,12 +71,13 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
                     <configuration>
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok</artifactId>
-                                <version>1.18.34</version>
+                                <version>${lombok.version}</version>
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
@@ -83,4 +85,4 @@
             </plugins>
         </pluginManagement>
     </build>
-    </project>
+</project>
