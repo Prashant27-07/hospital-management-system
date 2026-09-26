@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="
@@ -27,9 +26,9 @@
 
         <!-- Spring Cloud Gateway -->
         <dependency>
-    <groupId>org.springframework.cloud</groupId>
-    <artifactId>spring-cloud-starter-gateway</artifactId>
-</dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
 
         <!-- Actuator for health checks -->
         <dependency>
@@ -45,18 +44,5 @@
         </dependency>
 
     </dependencies>
-
-    <!-- Build Configuration -->
-    <build>
-        <plugins>
-
-            <!-- Creates executable Spring Boot JAR -->
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-
-        </plugins>
-    </build>
 
 </project>
