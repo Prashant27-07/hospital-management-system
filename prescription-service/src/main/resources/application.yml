@@ -15,7 +15,16 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+  cloud:
+    compatibility-verifier:
+      enabled: false
 
-# TODO (Phase 2): entities, DTOs, mapper, repository, service, controller,
-# Flyway migration, and tests for prescription-service follow the same layered
-# pattern as patient-service / doctor-service / appointment-service.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

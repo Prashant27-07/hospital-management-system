@@ -37,13 +37,10 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: host.docker.internal:2181
-
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://host.docker.internal:9092
-
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
@@ -61,12 +58,14 @@ services:
       DOCTOR_SERVICE_URL: http://host.docker.internal:8082
       DEPARTMENT_SERVICE_URL: http://host.docker.internal:8083
       APPOINTMENT_SERVICE_URL: http://host.docker.internal:8084
+      PRESCRIPTION_SERVICE_URL: http://host.docker.internal:8085
     depends_on:
       - auth-service
       - patient-service
       - doctor-service
       - department-service
       - appointment-service
+      - prescription-service
 
   # ---------- Core services ----------
   auth-service:
@@ -148,11 +147,32 @@ services:
       kafka:
         condition: service_started
 
-  # ---------- Phase 2 services ----------
-  # prescription-service, admission-service, bed-service, medicine-service,
-  # billing-service, payment-service, lab-service, insurance-service,
-  # notification-service, audit-service:
-  # Add them here when their implementations are ready.
+  # ---------- Phase 2 ----------
+  prescription-service:
+    build: ./prescription-service
+    container_name: hms-prescription-service
+    ports:
+      - "8085:8085"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      DB_URL: jdbc:postgresql://host.docker.internal:5432/prescription_service
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ---------- Future Phase 2 services ----------
+  # admission-service:
+  # bed-service:
+  # medicine-service:
+  # billing-service:
+  # payment-service:
+  # lab-service:
+  # insurance-service:
+  # notification-service:
+  # audit-service:
 
 volumes:
   pgdata:
